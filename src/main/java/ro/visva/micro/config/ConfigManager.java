@@ -25,6 +25,7 @@ public class ConfigManager {
    
    private boolean debugEnabled;
    
+   /** Get the instance of the ConfigManager */
    public static ConfigManager getInstance() {
       return instance;
    }
@@ -35,6 +36,10 @@ public class ConfigManager {
    
    private String initError;
    
+   /** Initialize the config manager.
+    * @param configFileName The full path to the configuration file.
+    * @return The init status
+    */
    public boolean init(String configFileName) {
       
       this.configFileName = configFileName;
@@ -49,32 +54,37 @@ public class ConfigManager {
       return isInited();
    }
    
+   /** Tell if the configuration manager is initialized. */
    public boolean isInited() {
       return initError == null;
    }
    
+   /** Internal method to clear any init error. */
    private void clearInitError() {
       initError = null;
    }
    
+   /** Get the initialization error, if any. */
    public String getInitError() {
       return initError;
    }
    
+   /** Enable debuggging. This will print a couple of debug entries to the standard output. */
    public void enableDebug() {
       this.debugEnabled = true;
    }
    
+   /** Disable debugging. */
    public void disableDebug() {
       this.debugEnabled = true;
    }
    
-   /** Tell if debug flag is enabled */
+   /** Tell if debugging is enabled. */
    public boolean isDebugEnabled() {
       return debugEnabled;
    }
    
-   /** Get the full path to the configuration file. */
+   /** Get the full path to the configuration file (provided during init). */
    public String getConfigFileName() {
       return configFileName;
    }
@@ -138,7 +148,7 @@ public class ConfigManager {
    }
    
    /** Remove a parameter from configuration.
-    * @param params The path to the parameter.
+    * @param params The path to the parameter in the JSON tree.
     */
    public void removeConfigParam(String ... params) {
    
