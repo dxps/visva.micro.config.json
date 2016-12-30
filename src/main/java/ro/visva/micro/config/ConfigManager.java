@@ -10,7 +10,7 @@ import java.nio.file.FileSystems;
 import java.util.Arrays;
 
 /**
- * Configuration Manager used for managing (reading from and writing to) a JSON-based configuration.
+ * Configuration Manager for managing (reading from and writing to) a JSON-based configuration.
  * @author visvadw
  */
 public class ConfigManager {
