@@ -1,6 +1,6 @@
 ## visva.micro > json-config
 
-Part of `visva.micro` initiative, this is a simple Java-based configuration manager for managing (reading from and writing to) a JSON-based configuration, including persisting it to a file.
+Part of `visva.micro` initiative, this is a simple Java-based configuration manager for managing (reading from and writing to) a configuration in JSON format, including persistency features (loading from and saving to) a file.
 
 ### TODOs
 
