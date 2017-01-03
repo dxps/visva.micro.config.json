@@ -95,7 +95,7 @@ public class ConfigManager {
     * @param params The path to the parameter.
     * @return The value of the parameter.
     */
-   public <T> T getConfigParamValue(T returnType, String... params) {
+   public <T> T getParamValue(T returnType, String... params) {
       
       JsonNode resultNode = getConfigNodeValue(params);
       //if ((resultNode == null)) || (resultNode.isMissingNode()) return null;
@@ -112,7 +112,7 @@ public class ConfigManager {
     * Insert or update a parameter into configuration.
     * @param params The path to the parameter, the last two entries being the parameter name and value.
     */
-   public void putConfigParam(String... params) throws Exception {
+   public void putParam(String... params) throws Exception {
       
       if (params == null) throw new Exception("Arguments cannot be null.");
       if (params.length < 2) throw new Exception("At least two arguments should be provided.");
@@ -122,7 +122,7 @@ public class ConfigManager {
       JsonNode parentNode, currentNode;
       parentNode = currentNode = configRootNode;
    
-      if (debugEnabled) log("putConfigParam", "configRootNode=" + configRootNode);
+      if (debugEnabled) log("putParam", "configRootNode=" + configRootNode);
       
       while (currentParamIndex < argsCount - 1) {
          currentParam = params[currentParamIndex];
@@ -141,8 +141,8 @@ public class ConfigManager {
                ((ObjectNode) parentNode).put(params[argsCount - 2], params[argsCount - 1]);
             }
          }
-         if (debugEnabled) log("putConfigParam", "parentNode: " + parentNode);
-         if (debugEnabled) log("putConfigParam", "currentNode: " + currentNode);
+         if (debugEnabled) log("putParam", "parentNode: " + parentNode);
+         if (debugEnabled) log("putParam", "currentNode: " + currentNode);
          currentParamIndex++;
       }
    }
@@ -150,25 +150,25 @@ public class ConfigManager {
    /** Remove a parameter from configuration.
     * @param params The path to the parameter in the JSON tree.
     */
-   public void removeConfigParam(String ... params) {
+   public void removeParam(String ... params) {
    
       if ((params == null) || (params.length < 1)) return;
       JsonNode node = getConfigNodeValue(Arrays.copyOf(params, params.length -1));
-      if (debugEnabled) log("removeConfigParam", "node = " + node);
+      if (debugEnabled) log("removeParam", "node = " + node);
       if (!node.isMissingNode()) {
          ((ObjectNode) node).remove(params[params.length - 1]);
       }
    }
    
    /** Persist the configuration to the file (provided during init). */
-   public void saveConfigToFile() throws IOException {
+   public void saveToFile() throws IOException {
    
-      if (debugEnabled) log("saveConfigToFile", String.format("Saving the following config to % file:\n%s", getConfigFileName(), getConfigJsonString()));
+      if (debugEnabled) log("saveToFile", String.format("Saving the following config to % file:\n%s", getConfigFileName(), getConfigAsJson()));
       objectMapper.writerWithDefaultPrettyPrinter().writeValue(configFile, configRootNode);
    }
    
    /** Get the configuration as String in JSON format. */
-   public String getConfigJsonString() throws IOException {
+   public String getConfigAsJson() throws IOException {
       return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configRootNode);
    }
    
