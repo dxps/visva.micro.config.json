@@ -7,6 +7,8 @@ import ro.visva.micro.config.ConfigManager;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A set of simple tests to check the ConfigManager behavior.
@@ -30,66 +32,93 @@ public class ConfigManagerTests {
    }
    
    @Test
-   public void test1ReadConfigParam() {
+   public void test1_getParamValue() {
       
       log("test1ReadConfigParam", String.format("app.release.date=%s",
-            configManager.getConfigParamValue("String", "app", "version")));
+            configManager.getParamValue("String", "app", "version")));
    }
    
    @Test
-   public void test2WriteConfigParam() {
+   public void test2_putParam_saveToFile() {
       
       try {
          String params[] = new String[]{"app", "release", "build", "20161129"};
-         log("test2WriteConfigParam", "Putting " + Arrays.toString(params) + " into config.");
-         configManager.putConfigParam(params);
-         configManager.saveConfigToFile();
+         log("test2_putParam_saveToFile", "Putting " + Arrays.toString(params) + " into config.");
+         configManager.putParam(params);
+         configManager.saveToFile();
       } catch (Exception e) {
-         Assert.fail("Error saving the config to file: " + e.getMessage());
+         Assert.fail("test2_putParam_saveToFile > Error saving the config to file: " + e.getMessage());
       }
       try {
-         log("test2WriteConfigParam", "configJsonString = " + configManager.getConfigJsonString());
+         log("test2_putParam_saveToFile", "configJsonString = " + configManager.getConfigAsJson());
       } catch (IOException e) {
-         Assert.fail("Error getting the config as String: " + e.getMessage());
+         Assert.fail("test2_putParam_saveToFile > Error getting the config as JSON: " + e.getMessage());
       }
    }
    
    @Test
-   public void test3WriteConfigParam() {
+   /* Put a param in the config and save the config to file. */
+   public void test3_putParam_saveToFile() {
       
       try {
          String params[] = new String[]{"app", "version", "0.5"};
-         log("test2WriteConfigParam", "Putting " + Arrays.toString(params) + " into config.");
-         configManager.putConfigParam(params);
-         configManager.saveConfigToFile();
+         log("test3_putParam_saveToFile", "Putting " + Arrays.toString(params) + " into config.");
+         configManager.putParam(params);
+         configManager.saveToFile();
       } catch (Exception e) {
-         Assert.fail("Error saving the config to file: " + e.getMessage());
+         Assert.fail("test3_putParam_saveToFile > Error saving the config to file: " + e.getMessage());
       }
       try {
-         log("test2WriteConfigParam", "configJsonString = " + configManager.getConfigJsonString());
+         log("test3_putParam_saveToFile", "configJsonString = " + configManager.getConfigAsJson());
       } catch (IOException e) {
-         Assert.fail("Error getting the config as String: " + e.getMessage());
+         Assert.fail("test3_putParam_saveToFile > Error getting the config as JSON: " + e.getMessage());
       }
    }
    
    @Test
-   public void test4RemoveConfigParam() {
+   /* Remove a config param and save the config to file. */
+   public void test4_removeParam_saveToFile() {
       
       String params[] = new String[]{"app", "version"};
-      log("test4RemoveConfigParam", "Removing " + Arrays.toString(params) + " from config.");
-      configManager.removeConfigParam(params);
+      log("test4_removeParam_saveToFile", "Removing " + Arrays.toString(params) + " from config.");
+      configManager.removeParam(params);
       try {
-         log("test4RemoveConfigParam", "configJsonString = " + configManager.getConfigJsonString());
+         log("test4_removeParam_saveToFile", "configJson = " + configManager.getConfigAsJson());
       } catch (IOException e) {
-         Assert.fail("Error getting the config as String: " + e.getMessage());
+         Assert.fail("test4_removeParam_saveToFile > Error getting the config as JSON: " + e.getMessage());
       }
       try {
-         configManager.saveConfigToFile();
-         log("test4RemoveConfigParam", "Config saved to file.");
+         configManager.saveToFile();
+         log("test4_removeParam_saveToFile", "Config saved to file.");
       } catch (IOException e) {
-         Assert.fail("Error saving the config to file: " + e.getMessage());
+         Assert.fail("test4_removeParam_saveToFile > Error saving the config to file: " + e.getMessage());
       }
    }
+   
+   @Test
+   public void test5_writeList() {
+   
+      Map<String,String> releaseHistory = new HashMap<>(3);
+      releaseHistory.put("2016-12-29", "1st steps");
+      releaseHistory.put("2016-12-30", "v0.5 | Partially enough.");
+      releaseHistory.put("2017-01-03", "v0.6 | At the time of this test.");
+      releaseHistory.forEach(
+            (date, description) -> {
+               try {
+                  configManager.putParam("app", "release", "history", date, description);
+               } catch (Exception e) {
+                  Assert.fail(String.format("test5_writeList > Error putting param '%s' into 'app.release.history' config: %s",
+                        date, e.getMessage()));
+               }
+            }
+      );
+      try {
+         log("test5_writeList", "configJson = " + configManager.getConfigAsJson());
+      } catch (IOException e) {
+         Assert.fail("test5_writeList > Error getting the config as JSON: " + e.getMessage());
+      }
+   }
+   
    
    /** Utility logging. */
    private void log(String prefix, String message) {
