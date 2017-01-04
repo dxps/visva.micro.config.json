@@ -1,5 +1,6 @@
 package ro.visva.micro.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -35,10 +36,11 @@ public class ConfigManager {
    }
    
    private String initError;
+   private String saveError;
    
    /** Initialize the config manager.
     * @param configFileName The full path to the configuration file.
-    * @return The init status
+    * @return true, if init succeeds;<br/>false, otherwise.
     */
    public boolean init(String configFileName) {
       
@@ -67,6 +69,11 @@ public class ConfigManager {
    /** Get the initialization error, if any. */
    public String getInitError() {
       return initError;
+   }
+   
+   /** Get the save error of the last call to saveToFile() method, if any. */
+   public String getSaveError() {
+      return saveError;
    }
    
    /** Enable debuggging. This will print a couple of debug entries to the standard output. */
@@ -111,16 +118,15 @@ public class ConfigManager {
    /**
     * Insert or update a parameter into configuration.
     * @param params The path to the parameter, the last two entries being the parameter name and value.
+    * @return true, if everything went ok;<br/>false, otherwise.
     */
-   public void putParam(String... params) throws Exception {
+   public boolean putParam(String... params) {
       
-      if (params == null) throw new Exception("Arguments cannot be null.");
-      if (params.length < 2) throw new Exception("At least two arguments should be provided.");
+      if ((params == null) || (params.length < 2)) return false;
       int argsCount = params.length;
       int currentParamIndex = 0;
       String currentParam;
-      JsonNode parentNode, currentNode;
-      parentNode = currentNode = configRootNode;
+      JsonNode parentNode, currentNode = configRootNode;
    
       if (debugEnabled) log("putParam", "configRootNode=" + configRootNode);
       
@@ -145,6 +151,7 @@ public class ConfigManager {
          if (debugEnabled) log("putParam", "currentNode: " + currentNode);
          currentParamIndex++;
       }
+      return true;
    }
    
    /** Remove a parameter from configuration.
@@ -160,16 +167,31 @@ public class ConfigManager {
       }
    }
    
-   /** Persist the configuration to the file (provided during init). */
-   public void saveToFile() throws IOException {
+   /**
+    * Persist the configuration to the file (provided during init).
+    * @return true, if everything went ok;<br/>false, otherwise.
+    */
+   public boolean saveToFile() {
    
-      if (debugEnabled) log("saveToFile", String.format("Saving the following config to % file:\n%s", getConfigFileName(), getConfigAsJson()));
-      objectMapper.writerWithDefaultPrettyPrinter().writeValue(configFile, configRootNode);
+      if (debugEnabled) log("saveToFile", String.format("Saving the following config to %s file:\n%s", getConfigFileName(), getConfigAsJson()));
+      try {
+         objectMapper.writerWithDefaultPrettyPrinter().writeValue(configFile, configRootNode);
+         return true;
+      } catch (IOException e) {
+         saveError = e.getMessage();
+         return false;
+      }
    }
    
-   /** Get the configuration as String in JSON format. */
-   public String getConfigAsJson() throws IOException {
-      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configRootNode);
+   /** Get the configuration as a JSON formatted String. */
+   public String getConfigAsJson() {
+      try {
+         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(configRootNode);
+      } catch (JsonProcessingException e) {
+         // (tbd) this should not happen ...
+         System.err.println("ConfigManager > getConfigAsJson > error: " + e.getMessage());
+         return "";
+      }
    }
    
    /** Internal utility method to get the value of a params from the config tree. */
