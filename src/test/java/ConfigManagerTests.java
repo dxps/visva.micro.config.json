@@ -43,7 +43,7 @@ public class ConfigManagerTests {
    public void test2_putParam_saveToFile() {
       
       String logPrefix = "test2_putParam_saveToFile";
-      String params[] = new String[]{"app", "release", "build", "20161129"};
+      String params[] = new String[]{"app", "release", "build", "date", "20161129"};
       log(logPrefix, "Putting " + Arrays.toString(params) + " into config.");
       configManager.putParam(params);
       configManager.saveToFile();
