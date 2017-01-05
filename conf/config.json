@@ -1,8 +1,9 @@
 {
   "app" : {
     "release" : {
-      "build" : "20161129",
-      "date" : "20161128",
+      "build" : {
+        "date" : "20161129"
+      },
       "history" : {
         "2017-01-03" : "v0.6 | At the time of this test.",
         "2016-12-30" : "v0.5 | Partially enough.",

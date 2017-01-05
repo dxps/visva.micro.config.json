@@ -105,51 +105,52 @@ public class ConfigManager {
    public <T> T getParamValue(T returnType, String... params) {
       
       JsonNode resultNode = getConfigNodeValue(params);
-      //if ((resultNode == null)) || (resultNode.isMissingNode()) return null;
+      boolean resultNotFound = resultNode.isMissingNode();
       String returnTypeName = returnType.getClass().getSimpleName();
       switch (returnTypeName) {
-         case "String": return (T) ((resultNode == null) ? "" : resultNode.textValue());
+         case "String": return (T) ((resultNotFound) ? "" : resultNode.textValue());
          case "Integer":
-         case "int": return (T) ((resultNode == null) ? "" : resultNode.intValue());
-         default: return (T) null;
+         case "int": return (T) ((resultNotFound) ? "" : resultNode.intValue());
+         default: return (T) "";
       }
    }
    
    /**
     * Insert or update a parameter into configuration.
-    * @param params The path to the parameter, the last two entries being the parameter name and value.
+    * @param params The path to the parameter, the last two entries being the parameter name and its value.
     * @return true, if everything went ok;<br/>false, otherwise.
     */
    public boolean putParam(String... params) {
       
       if ((params == null) || (params.length < 2)) return false;
-      int argsCount = params.length;
-      int currentParamIndex = 0;
+      int paramsCount = params.length;
+      int paramsIdx = 0;
       String currentParam;
       JsonNode parentNode, currentNode = configRootNode;
    
       if (debugEnabled) log("putParam", "configRootNode=" + configRootNode);
       
-      while (currentParamIndex < argsCount - 1) {
-         currentParam = params[currentParamIndex];
+      while (paramsIdx < paramsCount - 1) {
+         currentParam = params[paramsIdx];
          parentNode = currentNode;
          currentNode = currentNode.path(currentParam);
          if (currentNode.isMissingNode()) {
-            if (currentParamIndex < argsCount - 2) {
+            if (paramsIdx < paramsCount - 2) {
+               // create the currentParam as an object attribute of the parentNode
                ((ObjectNode) parentNode).putObject(currentParam);
             } else {
-               // here, it can only be the case when currentParamIndex = argsCount - 2
-               ((ObjectNode) parentNode).put(params[argsCount - 2], params[argsCount - 1]);
+               // here, it can only be the case when paramsIdx = paramsCount - 2
+               ((ObjectNode) parentNode).put(params[paramsCount - 2], params[paramsCount - 1]);
             }
             currentNode = parentNode.path(currentParam);
          } else {
-            if (currentParamIndex == argsCount - 2) {
-               ((ObjectNode) parentNode).put(params[argsCount - 2], params[argsCount - 1]);
+            if (paramsIdx == paramsCount - 2) {
+               ((ObjectNode) parentNode).put(params[paramsCount - 2], params[paramsCount - 1]);
             }
          }
          if (debugEnabled) log("putParam", "parentNode: " + parentNode);
          if (debugEnabled) log("putParam", "currentNode: " + currentNode);
-         currentParamIndex++;
+         paramsIdx++;
       }
       return true;
    }
@@ -194,19 +195,17 @@ public class ConfigManager {
       }
    }
    
-   /** Internal utility method to get the value of a params from the config tree. */
+   /**
+    * Internal utility method to get the value of a node in the config tree.
+    * @param params The path of the node.
+    */
    private JsonNode getConfigNodeValue(String... params) {
    
       if (debugEnabled) log("getConfigNodeValue", "params = " + Arrays.toString(params));
-      JsonNode resultNode = null;
-      boolean firstNode = true;
+      JsonNode resultNode = configRootNode;
       for (String p : params) {
-         if (firstNode) {
-            resultNode = configRootNode.get(p);
-            firstNode = false;
-         } else {
-            resultNode = resultNode.get(p);
-         }
+         if (!resultNode.isMissingNode())
+            resultNode = resultNode.path(p);
       }
       return resultNode;
    }
